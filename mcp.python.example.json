@@ -1,0 +1,11 @@
+{
+  "servers": {
+    "search-orchestrator": {
+      "command": "python",
+      "args": ["-m", "mcp_app"],
+      "env": {},
+      "workingDirectory": "python_mcp"
+    }
+  }
+}
+
