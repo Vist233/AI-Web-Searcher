@@ -34,3 +34,37 @@ def orchestrate(params: SearchInput, initial_candidates: list[Candidate] | None 
             "This is a scaffold. Implement provider calls, small-model workers, and ranker in orchestrator."
         ),
     )
+
+
+from agno.agent import Agent
+from agno.models.dashscope import DashScope
+from pydantic import BaseModel
+
+
+class searchResult(BaseModel):
+    OrderNum: int
+    title: str
+    url: str
+    abstract: str
+    content: str
+
+class searchResult(BaseModel):
+    OrderNum: int
+    title: str
+    url: str
+    abstract: str
+    content: str
+
+
+littleAgent = Agent(
+    model=DashScope(id="qwen-flash"),
+    markdown=False,
+)
+
+biggerAgent = Agent(
+    model=DashScope(id="qwen-plus"),
+    markdown=False,
+)
+
+if __name__ == "__main__":
+    littleAgent.print_response("Share a 2 sentence horror story.")
