@@ -1,0 +1,40 @@
+• Issue: DashScope JSON response fails without explicit “json” hint
+
+  - Environment
+      - agno version: please fill in
+      - Python version: please fill in
+      - Provider: DashScope (DashScope model)
+  - Problem
+    When using Agent(..., output_schema=...) the SDK automatically requests a JSON response from DashScope (response_format={"type": "json_object"} / JSON Schema). DashScope requires that
+    at least one conversation message explicitly mention the word “json”. If none do, the API responds with:
+
+    <400> InternalError.Algo.InvalidParameter: 'messages' must contain the word 'json' in some form, to use 'response_format' of type 'json_object'.
+  - Reproduction
+
+    from pydantic import BaseModel
+    from agno.agent import Agent
+    from agno.models.dashscope.dashscope import DashScope
+
+    class User(BaseModel):
+        name: str
+        age: int
+
+    agent = Agent(
+        model=DashScope(id="qwen-plus"),
+        output_schema=User,
+    )
+    agent.print_response("提取用户姓名和年龄。", stream=False)
+
+    No message mentions “json”, so DashScope returns HTTP 400.
+  - Expected
+    The DashScope model should add a JSON hint automatically when structured output is requested, so callers don’t have to craft prompts manually.
+  - Fix
+    In DashScope, add _ensure_json_hint to detect JSON response formats and prepend a system message “请以 JSON 格式返回。” when needed. Override invoke, ainvoke, invoke_stream,
+    ainvoke_stream to run this check before delegating to the base class.
+  - Tests
+    Added tests/models/dashscope/test_dashscope_json_hint.py covering:
+      1. Hint is inserted when missing.
+      2. No duplicate hint if “json” already present.
+      3. Pydantic schema case works.
+  - Impact
+    Structured responses with DashScope now succeed out of the box while preserving existing behavior when prompts already specify “json”.
