@@ -1,5 +1,7 @@
 import json
 from typing import Any, Dict, List, Optional
+from bs4 import BeautifulSoup
+import trafilatura
 
 from agno.tools import Toolkit
 from agno.utils.log import log_debug
@@ -52,12 +54,12 @@ class BaiduSearchTools(Toolkit):
 
         super().__init__(name="baidusearch", tools=tools, **kwargs)
 
-    def baidu_search(self, query: str, max_results: int = 5, language: str = "zh") -> str:
+    def baidu_search(self, query: str, max_results: int = 12, language: str = "zh") -> str:
         """Execute Baidu search and return results
 
         Args:
             query (str): Search keyword
-            max_results (int, optional): Maximum number of results to return, default 5
+            max_results (int, optional): Maximum number of results to return, default 12
             language (str, optional): Search language, default Chinese
 
         Returns:
@@ -86,17 +88,16 @@ class BaiduSearchTools(Toolkit):
                     "rank": str(idx),
                 }
             )
-        return json.dumps(res, indent=2)
+        return json.dumps(res, indent=2, ensure_ascii=False)
 
     def fetch_page(self, url: str, timeout_s: int | None = 10) -> str:
-        """Fetch a single web page and return raw text content.
+        """Fetch a single web page and return main text content.
 
-        NOTE: This is a simple implementation. You can replace with httpx + better HTML-to-text.
+        Uses trafilatura for better content extraction, falls back to BeautifulSoup.
         """
         try:
             import requests
-            from bs4 import BeautifulSoup
-
+            
             headers = {
                 "User-Agent": (
                     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
@@ -106,12 +107,44 @@ class BaiduSearchTools(Toolkit):
             }
             resp = requests.get(url, headers=headers, timeout=timeout_s)
             resp.raise_for_status()
+
+            text = trafilatura.extract(resp.content, include_comments=False, include_tables=False)
+            if text and len(text.strip()) > 100:  # Only return if we got substantial content
+                return text.strip()
+
+            raw_text = resp.text.strip()
+            return raw_text[:5000] if len(raw_text) > 5000 else raw_text
+
             soup = BeautifulSoup(resp.content, "html.parser")
-            return soup.get_text(" ", strip=True)
-        except Exception:
+            
+            # Remove script, style, and other non-content tags
+            for element in soup(["script", "style", "nav", "header", "footer", "aside", "iframe", "noscript"]):
+                element.decompose()
+            
+            # Try to find main content area
+            main_content = soup.find("main") or soup.find("article") or soup.find("div", class_=["content", "main", "article"])
+            if main_content:
+                text = main_content.get_text(" ", strip=True)
+            else:
+                text = soup.get_text(" ", strip=True)
+            
+            # Clean up excessive whitespace
+            import re
+            text = re.sub(r'\s+', ' ', text)
+            
+            # Limit to reasonable length (first 5000 chars)
+            return text[:5000] if len(text) > 5000 else text
+            
+        except Exception as e:
+            log_debug(f"Error fetching page {url}: {e}")
             return ""
 
 
 if __name__ == "__main__":
     tool = BaiduSearchTools(debug=True)
-    print(tool.baidu_search("人工智能", max_results=3, language="zh"))
+    jsonOutput = tool.baidu_search("人工智能", language="zh")
+    jsonData = json.loads(jsonOutput)
+    for item in jsonData:
+        print("--------------------------------")
+        print(item)
+    # print(tool.fetch_page("https://www.sohu.com"))

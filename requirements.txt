@@ -1,0 +1,16 @@
+# Core dependencies
+agno>=0.1.0
+requests>=2.31.0
+
+# Search functionality
+baidusearch>=1.0.0
+
+# Data processing
+pycountry>=22.0.0
+
+# Web scraping and content extraction
+beautifulsoup4>=4.12.0
+trafilatura>=1.6.0
+
+# Optional: HTML parsing
+lxml>=4.9.0
