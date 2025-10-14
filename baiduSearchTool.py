@@ -110,3 +110,8 @@ class BaiduSearchTools(Toolkit):
             return soup.get_text(" ", strip=True)
         except Exception:
             return ""
+
+
+if __name__ == "__main__":
+    tool = BaiduSearchTools(debug=True)
+    print(tool.baidu_search("人工智能", max_results=3, language="zh"))
