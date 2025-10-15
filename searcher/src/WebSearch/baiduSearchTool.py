@@ -191,7 +191,7 @@ class BaiduSearchTools(Toolkit):
 
 if __name__ == "__main__":
     tool = BaiduSearchTools(debug=True)
-    jsonOutput = tool.baidu_search("人工智能", language="zh")
+    jsonOutput = tool.baidu_search("近期金价暴涨 纳斯达克暴跌 原因 2025", language="zh")
     jsonData = json.loads(jsonOutput)
     for item in jsonData:
         print("--------------------------------")

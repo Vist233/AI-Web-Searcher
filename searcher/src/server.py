@@ -2,6 +2,10 @@ from fastmcp import FastMCP
 from FetchPage.fetchWeb import filter_extracted_text
 from typing import Optional
 from WebSearch.baiduSearchTool import BaiduSearchTools
+from useAI2Search.SearchAgent import filterAnswer
+import asyncio
+import json
+
 
 mcp = FastMCP("Search Tools")
 
@@ -12,7 +16,8 @@ mcp = FastMCP("Search Tools")
 
 @mcp.tool
 def search_baidu(query: str, max_results: int = 5, language: str = "zh") -> str:
-    """Execute Baidu search and return results
+    """Execute Baidu search and return results,
+    Due to the limited amount of content returned, it is recommended to use parameters of max_results with four or more
 
     Args:
         query (str): Search keyword
@@ -26,6 +31,22 @@ def search_baidu(query: str, max_results: int = 5, language: str = "zh") -> str:
     return tool.baidu_search(query, max_results=max_results, language=language)
 
 @mcp.tool
+async def AI_search_baidu(query: str, max_results: int = 5, language: str = "zh") -> str:
+    """Execute Baidu search using AI and return results in order, this func time cost almost 3 times more than search_baidu,
+    The AI will automatically filter and sort the search results, it is recommended to use parameters of max_results with five or more
+
+    Args:
+        query (str): Search keyword
+        max_results (int, optional): Maximum number of results to return, default 5
+        language (str, optional): Search language, default Chinese
+
+    Returns:
+        str: A JSON formatted string containing the search results (rank, title, url, Content).
+    """
+    result = await filterAnswer(query, max_results, language)
+    return json.dumps(result, ensure_ascii=False, indent=2)
+
+@mcp.tool
 def extractTextFromUrl(
     url: str,
     *,
@@ -36,19 +57,19 @@ def extractTextFromUrl(
     regular_expressions: Optional[list[str]] = None,
 ) -> str:
     """
-    提取并过滤指定网址的整页可读文本（可选跟随 rel=\"next\" 分页），实现方式与项目一致：
-    - 使用 requests 抓取 HTML
-    - 使用 trafilatura.extract 提取纯文本，失败时回退到原始 HTML 文本
-    - 使用正则表达式过滤文本
+    Extract and filter readable text from a webpage with optional pagination support.
+    
+    Uses requests to fetch HTML, trafilatura to extract clean text (falls back to raw HTML),
+    and regex patterns to filter content.
 
-    参数:
-      - url: 目标网页
-      - follow_pagination: 是否跟随 rel=\"next\" 的分页链接
-      - pagination_limit: 最多跟随的分页深度（至少 1）
-      - timeout: 每次 HTTP 请求超时时间（秒）
-      - user_agent: 自定义 UA；不提供则使用常见浏览器 UA
-      - regular_expressions: 用于过滤文本的正则表达式列表；如果为 None 或空列表，则不进行过滤
-      """
+    Args:
+        url: Target webpage URL
+        follow_pagination: Whether to follow rel="next" pagination links
+        pagination_limit: Maximum pagination depth (minimum 1)
+        timeout: HTTP request timeout in seconds
+        user_agent: Custom User-Agent header (defaults to common browser UA)
+        regular_expressions: Regex patterns to filter text; no filtering if None or empty
+    """
     return filter_extracted_text(
         url,
         follow_pagination=follow_pagination,
@@ -57,6 +78,43 @@ def extractTextFromUrl(
         user_agent=user_agent,
         regular_expressions=regular_expressions,
     )
+
+@mcp.tool
+def extractTextFromUrls(
+    urls: list[str],
+    *,
+    follow_pagination: bool = True,
+    pagination_limit: int = 3,
+    timeout: float = 10.0,
+    user_agent: Optional[str] = None,
+    regular_expressions: Optional[list[str]] = None,
+) -> str:
+    """
+    Extract and filter readable text from multiple webpages with optional pagination support.
+    
+    Uses requests to fetch HTML, trafilatura to extract clean text (falls back to raw HTML),
+    and regex patterns to filter content. Regex filtering is recommended for multiple URLs.
+
+    Args:
+        urls: List of target webpage URLs
+        follow_pagination: Whether to follow rel="next" pagination links
+        pagination_limit: Maximum pagination depth (minimum 1)
+        timeout: HTTP request timeout in seconds
+        user_agent: Custom User-Agent header (defaults to common browser UA)
+        regular_expressions: Regex patterns to filter text; no filtering if None or empty
+    """
+    results = []
+    for url in urls:
+        results.append(filter_extracted_text(
+        url,
+        follow_pagination=follow_pagination,
+        pagination_limit=pagination_limit,
+        timeout=timeout,
+        user_agent=user_agent,
+        regular_expressions=regular_expressions,
+        ))
+    return "\n\n".join(results)
+
 
 
 if __name__ == "__main__":
