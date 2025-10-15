@@ -1,3 +1,4 @@
+from time import time
 from agno.agent import Agent
 from agno.models.dashscope import DashScope
 from agno.agent import Agent
@@ -5,10 +6,6 @@ from baiduSearchTool import BaiduSearchTools
 import json
 from pydantic import BaseModel
 import asyncio
-
-"""流程是首先使用百度搜索工具获取相关信息，然后将这些信息传递给不同的FinderAgent进行处理：将返回的内容根据相关度进行Rank的重排
-    ，最后由主Agent整合各个子Agent的输出并且将所有的结果的75%通过FetchPage得到具体内容，最后将相关的信息进行整合得到
-    自己整合的title、url、abstract，生成最终的回答。"""
 
 class SearchResult(BaseModel):
     rank: str
@@ -83,7 +80,7 @@ async def filterAnswer():
     Result2 = AllResult[max_results//3:2*max_results//3]
     Result3 = AllResult[2*max_results//3:max_results]
 
-    print("Result1:", Result1)
+    # print("Result1:", Result1)
 
     filter1 = await finder1.arun(
         f"User input query: {userInputQuery}. {json.dumps(Result1, indent=2, ensure_ascii=False)}",
@@ -116,8 +113,11 @@ async def filterAnswer():
     return finalResult
 
 if __name__ == "__main__":
+    beginTime = time()
     searchRank = asyncio.run(filterAnswer())
+    endTime = time()
+    print(f"程序执行耗时: {endTime - beginTime:.2f} 秒")
     # print(searchRank)
-    searchResults = manager.run(f"User input query: {userInputQuery}" + json.dumps(searchRank, ensure_ascii=False, indent=2), stream=False)
-    print(searchResults.content)
+    # searchResults = manager.run(f"User input query: {userInputQuery}" + json.dumps(searchRank, ensure_ascii=False, indent=2), stream=False)
+    # print(searchResults.content)
 
