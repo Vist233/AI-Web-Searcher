@@ -10,7 +10,7 @@ readme = "README.md"
 requires-python = ">=3.10"
 license = {text = "MIT"}
 authors = [
-    {name = "Vist233", email = "your-email@example.com"}
+    {name = "Vist233", email = "zhangyvjing@outlook.com"}
 ]
 keywords = ["mcp", "search", "baidu", "ai", "llm", "model-context-protocol"]
 classifiers = [
@@ -46,9 +46,9 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/Vist233/Google-Search-Tool"
-Repository = "https://github.com/Vist233/Google-Search-Tool"
-Issues = "https://github.com/Vist233/Google-Search-Tool/issues"
+Homepage = "https://github.com/Vist233/Web-Search-MCP"
+Repository = "https://github.com/Vist233/Web-Search-MCP"
+Issues = "https://github.com/Vist233/Web-Search-MCP/issues"
 
 [project.scripts]
 search-mcp = "searcher.src.server:main"
