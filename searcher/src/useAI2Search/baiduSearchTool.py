@@ -188,12 +188,3 @@ class BaiduSearchTools(Toolkit):
             log_debug(f"Error fetching page {url}: {e}")
             return ""
 
-
-if __name__ == "__main__":
-    tool = BaiduSearchTools(debug=True)
-    jsonOutput = tool.baidu_search("人工智能", language="zh")
-    jsonData = json.loads(jsonOutput)
-    for item in jsonData:
-        print("--------------------------------")
-        print(item)
-    # print(tool.fetch_page("https://www.sohu.com"))

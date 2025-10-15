@@ -32,7 +32,7 @@ def search_baidu(query: str, max_results: int = 5, language: str = "zh") -> str:
 
 @mcp.tool
 async def AI_search_baidu(query: str, max_results: int = 5, language: str = "zh") -> str:
-    """Execute Baidu search using AI and return results in order, this func time cost almost 3 times more than search_baidu,
+    """Execute Baidu search using AI and return results in order, this func time cost almost 10s,
     The AI will automatically filter and sort the search results, it is recommended to use parameters of max_results with five or more
 
     Args:

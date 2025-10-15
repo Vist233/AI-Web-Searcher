@@ -112,12 +112,3 @@ async def filterAnswer():
 
     return finalResult
 
-if __name__ == "__main__":
-    beginTime = time()
-    searchRank = asyncio.run(filterAnswer())
-    endTime = time()
-    print(f"程序执行耗时: {endTime - beginTime:.2f} 秒")
-    # print(searchRank)
-    # searchResults = manager.run(f"User input query: {userInputQuery}" + json.dumps(searchRank, ensure_ascii=False, indent=2), stream=False)
-    # print(searchResults.content)
-

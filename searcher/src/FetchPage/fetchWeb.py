@@ -141,6 +141,3 @@ def filter_extracted_text(
 
     return "\n".join(filtered_lines).strip()
 
-if __name__ == "__main__":
-    test_url = "https://www.baidu.com"
-    print(extract_text_from_url(test_url, follow_pagination=True, pagination_limit=2))

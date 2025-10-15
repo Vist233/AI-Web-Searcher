@@ -1,39 +1,266 @@
-MCP 搜索编排（Python）
+# Search MCP Server
 
-本仓库提供一个 Python 版的 Model Context Protocol (MCP) 服务端脚手架，用于“搜索 → 三个小模型并行抽取 → 大模型排序过滤”的编排场景。核心逻辑留空，便于按你的方案实现。
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 
-目录结构
+A powerful Model Context Protocol (MCP) server providing AI-enhanced Baidu search with intelligent reranking and comprehensive web content extraction capabilities.
 
-- `python_mcp/mcp_app/server.py`：MCP 入口，暴露 `search_orchestrator` 工具
-- `python_mcp/mcp_app/schemas.py`：Pydantic 入参/出参模型（`SearchInput`、`Candidate`、`SearchResponse`）
-- `python_mcp/mcp_app/orchestrator/pipeline.py`：编排层占位（待实现：搜索→抓取→3小模型→大模型排序）
-- `python_mcp/mcp_app/search/providers/base.py`：搜索 Provider 接口
-- `python_mcp/mcp_app/search/providers/google.py`：搜索 Provider 占位（你来实现，不在此适配示例文件）
-- `python_mcp/mcp_app/workers/small_model_worker.py`：小模型 Worker 占位
-- `python_mcp/mcp_app/workers/ranker.py`：大模型排序器占位
-- `mcp.python.example.json`：MCP 客户端示例配置
-- `GoogleSearchToolExample.py`：你的 Google 搜索工具
+## ✨ Features
 
-使用方式
+- 🔍 **Baidu Search Integration**: Fast and reliable search results from Baidu
+- 🤖 **AI-Powered Reranking**: Uses multiple AI agents (Qwen) to intelligently rerank search results by relevance
+- 📄 **Web Content Extraction**: Extract clean, readable text from web pages with pagination support
+- 🎯 **Batch Processing**: Extract content from multiple URLs simultaneously
+- 🌐 **MCP Standard**: Fully compliant with Model Context Protocol for seamless integration
 
-- 在 MCP 客户端中配置：参考 `mcp.python.example.json`（`command: python`，`args: -m mcp_app`，`workingDirectory: python_mcp`）
-- 本地启动（便于烟测）：在仓库根目录执行 `python -m mcp_app`（工作目录为 `python_mcp`）
-- 依赖（按需安装）：`pip install mcp pydantic googlesearch-python pycountry`
+## 🚀 Quick Start
 
-工作流程（待你实现的核心）
+### Prerequisites
 
-- 搜索：通过 `search.providers` 选择 Provider（`google.py` 为占位，需要你实现）
-- 抓取/解析：当 `with_content=true` 时由 `server.py` 中的 `fetch_page()` 进行抓取，并发可自行扩展
-- 小模型分发：三个小模型并行抽取结构化候选（统一 `Candidate` Schema）
-- 大模型排序：聚合候选，调用大模型过滤去重、排序，得到最终列表
-- 返回：`SearchResponse`（含 `results`、`used_providers`、`latency_ms`）
+- Python 3.10 or higher
+- [uv](https://github.com/astral-sh/uv) (recommended) or pip
+- DashScope API key (for AI search features)
 
-开发提示
+### Installation
 
-- 在 `orchestrator/pipeline.py` 串起 provider → 抓取 → 小模型 → ranker（保留推理实现为 TODO）
-- 在 `workers/` 中实现三个小模型抽取逻辑；在 `ranker.py` 实现大模型排序
-- 如需合规稳定的搜索源，可并行实现 CSE/Bing/Brave/Tavily provider 并通过配置切换
+#### Using uv (Recommended)
 
-注意
+```bash
+# Clone the repository
+git clone https://github.com/Vist233/Google-Search-Tool.git
+cd search-mcp
 
-- 本仓库已移除 TypeScript 版示例，专注于 Python MCP。
+# Install with uv
+uv pip install -e .
+```
+
+#### Using pip
+
+```bash
+pip install -e .
+```
+
+### Environment Setup
+
+Create a `.env` file or set environment variables for AI features:
+
+```bash
+export DASHSCOPE_API_KEY="your-api-key-here"
+```
+
+## 📖 Usage
+
+### As an MCP Server
+
+Add to your MCP client configuration (e.g., Claude Desktop):
+
+**For macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
+
+**For Windows**: `%APPDATA%/Claude/claude_desktop_config.json`
+
+```json
+{
+  "mcpServers": {
+    "search-tools": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/path/to/search-mcp/searcher/src",
+        "run",
+        "python",
+        "server.py"
+      ]
+    }
+  }
+}
+```
+
+Alternatively, if installed globally:
+
+```json
+{
+  "mcpServers": {
+    "search-tools": {
+      "command": "python",
+      "args": [
+        "-m",
+        "searcher.src.server"
+      ],
+      "cwd": "/path/to/search-mcp"
+    }
+  }
+}
+```
+
+### Standalone Testing
+
+```bash
+cd searcher/src
+python server.py
+```
+
+## 🛠️ Available Tools
+
+### 1. `search_baidu`
+
+Execute basic Baidu search and return structured results.
+
+**Parameters:**
+- `query` (str): Search keyword
+- `max_results` (int, optional): Maximum results to return (default: 5)
+- `language` (str, optional): Search language (default: "zh")
+
+**Returns:** JSON string with title, url, and abstract for each result.
+
+**Example:**
+```python
+{
+  "query": "人工智能发展现状",
+  "max_results": 5
+}
+```
+
+### 2. `AI_search_baidu`
+
+AI-enhanced search with intelligent reranking and content extraction. Takes ~3x longer but provides higher quality, ranked results with full page content.
+
+**Parameters:**
+- `query` (str): Search keyword
+- `max_results` (int, optional): Initial results to fetch (default: 5, recommended 5+)
+- `language` (str, optional): Search language (default: "zh")
+
+**Returns:** JSON string with rank, title, url, and Content (full page text) for each result.
+
+**Example:**
+```python
+{
+  "query": "AI发展趋势 2025",
+  "max_results": 12
+}
+```
+
+### 3. `extractTextFromUrl`
+
+Extract clean, readable text from a single webpage.
+
+**Parameters:**
+- `url` (str): Target webpage URL
+- `follow_pagination` (bool, optional): Follow rel="next" links (default: true)
+- `pagination_limit` (int, optional): Max pagination depth (default: 3)
+- `timeout` (float, optional): HTTP timeout in seconds (default: 10.0)
+- `user_agent` (str, optional): Custom User-Agent header
+- `regular_expressions` (list[str], optional): Regex patterns to filter text
+
+**Returns:** Extracted text content as string.
+
+### 4. `extractTextFromUrls`
+
+Extract text from multiple webpages in batch.
+
+**Parameters:** Same as `extractTextFromUrl`, plus:
+- `urls` (list[str]): List of target URLs
+
+**Returns:** Combined text from all URLs, separated by double newlines.
+
+## 🏗️ Project Structure
+
+```
+search-mcp/
+├── searcher/
+│   └── src/
+│       ├── server.py              # MCP server entry point
+│       ├── FetchPage/
+│       │   └── fetchWeb.py        # Web content extraction
+│       ├── WebSearch/
+│       │   ├── baiduSearchTool.py # Baidu search implementation
+│       │   └── SearchAgent.py     # AI agent definitions (legacy)
+│       └── useAI2Search/
+│           └── SearchAgent.py     # AI-powered search orchestration
+├── tests/                         # Test files
+├── pyproject.toml                # Project configuration
+├── requirements.txt              # Dependencies
+└── README.md                     # This file
+```
+
+## 🔧 Development
+
+### Install Development Dependencies
+
+```bash
+uv pip install -e ".[dev]"
+```
+
+### Run Tests
+
+```bash
+pytest
+```
+
+### Code Formatting
+
+```bash
+# Format with black
+black searcher/
+
+# Lint with ruff
+ruff check searcher/
+```
+
+## 📝 Configuration
+
+### MCP Client Configuration Examples
+
+**Minimal configuration:**
+```json
+{
+  "mcpServers": {
+    "search": {
+      "command": "python",
+      "args": ["server.py"],
+      "cwd": "/path/to/search-mcp/searcher/src"
+    }
+  }
+}
+```
+
+**With uv for dependency isolation:**
+```json
+{
+  "mcpServers": {
+    "search": {
+      "command": "uv",
+      "args": ["--directory", "/path/to/search-mcp/searcher/src", "run", "python", "server.py"]
+    }
+  }
+}
+```
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- Built with [FastMCP](https://github.com/jlowin/fastmcp)
+- AI models powered by [Agno](https://github.com/agno-agi/agno) and DashScope
+- Search powered by [baidusearch](https://github.com/liuxingwt/baidusearch)
+- Content extraction using [trafilatura](https://github.com/adbar/trafilatura)
+
+## 📮 Contact
+
+- GitHub: [@Vist233](https://github.com/Vist233)
+- Repository: [Google-Search-Tool](https://github.com/Vist233/Google-Search-Tool)
+
+## ⚠️ Disclaimer
+
+This tool is for educational and research purposes. Please respect website terms of service and rate limits when scraping content.
