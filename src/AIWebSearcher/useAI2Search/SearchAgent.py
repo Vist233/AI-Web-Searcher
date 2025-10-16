@@ -4,7 +4,9 @@ from agno.agent import Agent
 from AIWebSearcher.WebSearch.baiduSearchTool import BaiduSearchTools
 import json
 from pydantic import BaseModel
+import os
 
+ds_key = os.getenv("DASHSCOPE_API_KEY")
 
 class SearchResult(BaseModel):
     rank: str
@@ -22,7 +24,7 @@ class AllResult(BaseModel):
 
 
 manager = Agent(
-    model=DashScope(id="qwen-plus"),
+    model=DashScope(id="qwen-plus", api_key=ds_key),
     description="Rerank the search results based on their relevance to the topic of the user input query.",
     instructions=[
         "You are a Summizer specialized in summarizing results based on their relevance to the topic of the user input query.",
@@ -34,7 +36,7 @@ manager = Agent(
 )
 
 finder1 = Agent(
-    model=DashScope(id="qwen-flash"),
+    model=DashScope(id="qwen-flash", api_key=ds_key),
     description="Rerank the search results based on their relevance to the topic of the user input query.",
     instructions=[
             "遍历提供的每条结果，结合标题、摘要和 url 判断与查询主题的相关度。所有输入的文章都要保留下来",
@@ -46,7 +48,7 @@ finder1 = Agent(
     markdown=False,
 )
 finder2 = Agent(
-    model=DashScope(id="qwen-flash"),
+    model=DashScope(id="qwen-flash", api_key=ds_key),
     description="Rerank the search results based on their relevance to the topic of the user input query.",
     instructions=[
             "遍历提供的每条结果，结合标题、摘要和 url 判断与查询主题的相关度。所有输入的文章都要保留下来",
@@ -58,7 +60,7 @@ finder2 = Agent(
     markdown=False,
 )
 finder3 = Agent(
-    model=DashScope(id="qwen-flash"),
+    model=DashScope(id="qwen-flash", api_key=ds_key),
     description="Rerank the search results based on their relevance to the topic of the user input query.",
     instructions=[
             "遍历提供的每条结果，结合标题、摘要和 url 判断与查询主题的相关度。所有输入的文章都要保留下来",

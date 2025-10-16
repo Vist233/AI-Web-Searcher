@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "aiwebsearcher": {
+      "command": "uvx",
+      "args": ["aiwebsearcher@0.1.2"],
+      "env": {
+        "DASHSCOPE_API_KEY": "your_api_key_here"
+      }
+    }
+  }
+}
