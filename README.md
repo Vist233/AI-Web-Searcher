@@ -61,43 +61,39 @@ Add to your MCP client configuration (e.g., Claude Desktop):
 ```json
 {
   "mcpServers": {
-    "search-tools": {
-      "command": "uv",
+    "aiwebsearcher": {
+      "command": "uvx",
       "args": [
-        "--directory",
-        "/path/to/search-mcp/searcher/src",
-        "run",
-        "python",
-        "server.py"
+        "aiwebsearcher"
       ]
     }
   }
 }
 ```
 
-Alternatively, if installed globally:
+**Note**: API key is read from environment variable `DASHSCOPE_API_KEY`. Set it before running:
 
-```json
-{
-  "mcpServers": {
-    "search-tools": {
-      "command": "python",
-      "args": [
-        "-m",
-        "searcher.src.server"
-      ],
-      "cwd": "/path/to/search-mcp"
-    }
-  }
-}
+```bash
+# macOS/Linux
+export DASHSCOPE_API_KEY="your-api-key-here"
+
+# Windows (PowerShell)
+$env:DASHSCOPE_API_KEY="your-api-key-here"
 ```
 
 ### Standalone Testing
 
 ```bash
-cd searcher/src
-python server.py
+# Install the package
+pip install aiwebsearcher
+
+# Set API key
+export DASHSCOPE_API_KEY="your-key"
+
+# Run the server
+aiwebsearcher
 ```
+
 
 ## 🛠️ Available Tools
 

@@ -1,11 +1,10 @@
-from time import time
 from agno.agent import Agent
 from agno.models.dashscope import DashScope
 from agno.agent import Agent
-from baiduSearchTool import BaiduSearchTools
+from AIWebSearcher.WebSearch.baiduSearchTool import BaiduSearchTools
 import json
 from pydantic import BaseModel
-import asyncio
+
 
 class SearchResult(BaseModel):
     rank: str
@@ -19,6 +18,8 @@ class AllResult(BaseModel):
     title: str
     url: str
     mostRelativeContent: str
+
+
 
 manager = Agent(
     model=DashScope(id="qwen-plus"),
@@ -69,29 +70,25 @@ finder3 = Agent(
     markdown=False,
 )
 
-Tools = BaiduSearchTools()
 
-max_results = 12
-userInputQuery = "人工智能"
 
-async def filterAnswer():
-    AllResult = json.loads(Tools.baidu_search(userInputQuery, max_results, language="zh"))
+async def filterAnswer(query, max_results, language="zh"):
+    Tools = BaiduSearchTools()
+    AllResult = json.loads(Tools.baidu_search(query, max_results*2, language))
     Result1 = AllResult[0:max_results//3]
     Result2 = AllResult[max_results//3:2*max_results//3]
     Result3 = AllResult[2*max_results//3:max_results]
 
-    # print("Result1:", Result1)
-
     filter1 = await finder1.arun(
-        f"User input query: {userInputQuery}. {json.dumps(Result1, indent=2, ensure_ascii=False)}",
+        f"User input query: {query}. {json.dumps(Result1, indent=2, ensure_ascii=False)}",
         stream=False
     )
     filter2 = await finder2.arun(
-        f"User input query: {userInputQuery}. {json.dumps(Result2, indent=2, ensure_ascii=False)}",
+        f"User input query: {query}. {json.dumps(Result2, indent=2, ensure_ascii=False)}",
         stream=False
     )
     filter3 = await finder3.arun(
-        f"User input query: {userInputQuery}. {json.dumps(Result3, indent=2, ensure_ascii=False)}",
+        f"User input query: {query}. {json.dumps(Result3, indent=2, ensure_ascii=False)}",
         stream=False
     )
 
@@ -111,4 +108,12 @@ async def filterAnswer():
         item['Content'] = await Tools.async_fetch_page(item['url'])
 
     return finalResult
+
+# if __name__ == "__main__":
+#     from time import time
+#     import asyncio
+#     beginTime = time()
+#     searchRank = asyncio.run(filterAnswer("人工智能", 6))
+#     endTime = time()
+#     print(f"程序执行耗时: {endTime - beginTime:.2f} 秒")
 

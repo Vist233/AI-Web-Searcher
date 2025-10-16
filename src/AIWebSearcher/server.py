@@ -1,13 +1,13 @@
-from fastmcp import FastMCP
-from FetchPage.fetchWeb import filter_extracted_text
-from typing import Optional
-from WebSearch.baiduSearchTool import BaiduSearchTools
-from useAI2Search.SearchAgent import filterAnswer
-import asyncio
 import json
+from typing import Optional
+
+from fastmcp import FastMCP
+from AIWebSearcher.FetchPage.fetchWeb import filter_extracted_text
+from AIWebSearcher.WebSearch.baiduSearchTool import BaiduSearchTools
+from AIWebSearcher.useAI2Search.SearchAgent import filterAnswer
 
 
-mcp = FastMCP("Search Tools")
+mcp = FastMCP("AIWebSearcher")
 
 # @mcp.tool
 # def add(a: int, b: int) -> int:
@@ -116,7 +116,11 @@ def extractTextFromUrls(
     return "\n\n".join(results)
 
 
+def main() -> None:
+    """Start the MCP server over stdio."""
+    mcp.run(transport="stdio")
+
 
 if __name__ == "__main__":
-    mcp.run(transport="stdio")
+    main()
 
