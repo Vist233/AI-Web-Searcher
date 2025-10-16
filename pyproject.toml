@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "aiwebsearcher"
-version = "0.1.1"
+version = "0.1.2"
 description = "A Model Context Protocol (MCP) server providing AI-powered Baidu search with intelligent reranking and web content extraction"
 readme = { file = "README.md", content-type = "text/markdown" }
 requires-python = ">=3.10"
@@ -38,6 +38,7 @@ dependencies = [
   "trafilatura>=1.6.0",
   "lxml>=4.9.0",
   "pydantic>=2.0.0",
+  "openai>=2.1.0",
 ]
 
 [project.optional-dependencies]

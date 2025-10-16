@@ -10,7 +10,7 @@
 
 ```toml
 [project]
-version = "0.1.0"  # 更新为新版本
+version = "0.1."  # 更新为新版本
 ```
 
 在 `searcher/__init__.py` 中同步更新：
