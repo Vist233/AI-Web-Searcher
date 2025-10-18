@@ -189,3 +189,11 @@ class BaiduSearchTools(Toolkit):
             return ""
 
 
+
+# if __name__ == "__main__":
+#     tool = BaiduSearchTools(debug=True)
+#     import time
+#     start_time = time.time()
+#     print(tool.baidu_search("人工智能", max_results=3, language="zh"))
+#     end_time = time.time()
+#     print(f"Search completed in {end_time - start_time:.2f} seconds")
