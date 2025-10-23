@@ -20,19 +20,22 @@ def extract_text_from_url(
     user_agent: Optional[str] = None,
 ) -> str:
     """
-    提取指定网址的整页可读文本（可选跟随 rel=\"next\" 分页），实现方式与项目一致：
-    - 使用 requests 抓取 HTML
-    - 使用 trafilatura.extract 提取纯文本，失败时回退到原始 HTML 文本
+    Extract readable text from a webpage (optionally following rel="next" pagination).
 
-    参数:
-      - url: 目标网页
-      - follow_pagination: 是否跟随 rel=\"next\" 的分页链接
-      - pagination_limit: 最多跟随的分页深度（至少 1）
-      - timeout: 每次 HTTP 请求超时时间（秒）
-      - user_agent: 自定义 UA；不提供则使用常见浏览器 UA
+    Implementation details:
+    - Fetch HTML using requests.
+    - Use trafilatura.extract to extract clean text; fall back to raw HTML if extraction fails.
 
-    返回:
-      - 拼接后的纯文本，分页之间以空行分隔；无可用文本时返回空字符串
+    Parameters:
+      - url: Target webpage URL.
+      - follow_pagination: Whether to follow rel="next" pagination links.
+      - pagination_limit: Maximum pagination depth (minimum 1).
+      - timeout: HTTP request timeout in seconds.
+      - user_agent: Custom User-Agent string; if not provided a common browser UA is used.
+
+    Returns:
+      - The concatenated plain text with blank lines between paginated pages; returns an
+        empty string if no usable text is found.
     """
 
     class _RelLinkParser(HTMLParser):
@@ -107,19 +110,22 @@ def filter_extracted_text(
     regular_expressions: Optional[list[str]] = None,
 ) -> str:
     """
-    提取并过滤指定网址的整页可读文本（可选跟随 rel=\"next\" 分页），实现方式与项目一致：
-    - 使用 requests 抓取 HTML
-    - 使用 trafilatura.extract 提取纯文本，失败时回退到原始 HTML 文本
-    - 使用正则表达式过滤文本
+    Extract and filter readable text from a webpage (optionally following rel="next" pagination).
 
-    参数:
-      - url: 目标网页
-      - follow_pagination: 是否跟随 rel=\"next\" 的分页链接
-      - pagination_limit: 最多跟随的分页深度（至少 1）
-      - timeout: 每次 HTTP 请求超时时间（秒）
-      - user_agent: 自定义 UA；不提供则使用常见浏览器 UA
-      - regular_expressions: 用于过滤文本的正则表达式列表；如果为 None 或空列表，则不进行过滤
-      """
+    Implementation details:
+    - Fetch HTML using requests.
+    - Use trafilatura.extract to extract clean text; fall back to raw HTML if extraction fails.
+    - Use regular expressions to filter the extracted text.
+
+    Parameters:
+      - url: Target webpage URL.
+      - follow_pagination: Whether to follow rel="next" pagination links.
+      - pagination_limit: Maximum pagination depth (minimum 1).
+      - timeout: HTTP request timeout in seconds.
+      - user_agent: Custom User-Agent string; if not provided a common browser UA is used.
+      - regular_expressions: List of regex patterns used to filter text; if None or empty,
+        no filtering is performed.
+    """
     import re
 
     text = extract_text_from_url(

@@ -34,9 +34,7 @@ class BaiduSearchTools(Toolkit):
         fixed_max_results: Optional[int] = None,
         fixed_language: Optional[str] = None,
         headers: Optional[Any] = None,
-        proxy: Optional[str] = None,
         timeout: Optional[int] = 10,
-        debug: Optional[bool] = False,
         enable_baidu_search: bool = True,
         all: bool = False,
         **kwargs,
@@ -44,9 +42,7 @@ class BaiduSearchTools(Toolkit):
         self.fixed_max_results = fixed_max_results
         self.fixed_language = fixed_language
         self.headers = headers
-        self.proxy = proxy
         self.timeout = timeout
-        self.debug = debug
 
         tools = []
         if all or enable_baidu_search:
@@ -191,9 +187,9 @@ class BaiduSearchTools(Toolkit):
 
 
 # if __name__ == "__main__":
-#     tool = BaiduSearchTools(debug=True)
+#     tool = BaiduSearchTools()
 #     import time
 #     start_time = time.time()
-#     print(tool.baidu_search("人工智能", max_results=3, language="zh"))
+#     print(tool.baidu_search("B站音乐区Top10", max_results=3, language="zh"))
 #     end_time = time.time()
 #     print(f"Search completed in {end_time - start_time:.2f} seconds")
